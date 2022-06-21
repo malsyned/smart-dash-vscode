@@ -18,12 +18,16 @@ let hscopes = extensions.getExtension('draivin.hscopes')?.exports;
 export function activate(context: ExtensionContext) {
 	if (hscopes) {
 		let insertDisposable = commands.registerCommand('smart-dash.insert', () => {
-			insert(window.activeTextEditor);
+			if (window.activeTextEditor) {
+				insert(window.activeTextEditor);
+			}
 		});
 		context.subscriptions.push(insertDisposable);
 
 		let insertGtDisposable = commands.registerCommand('smart-dash.insertGreaterThan', () => {
-			insertGt(window.activeTextEditor);
+			if (window.activeTextEditor) {
+				insertGt(window.activeTextEditor);
+			}
 		});
 		context.subscriptions.push(insertGtDisposable);
 	}
@@ -31,26 +35,26 @@ export function activate(context: ExtensionContext) {
 
 export function deactivate() { }
 
-function insert(editor: TextEditor | undefined) {
-	editor?.edit(e => {
-		const cLike = isCLike(editor.document);
-		const sel = editor.selection;
-		const pos = editor.selection.start;
-		const document = editor.document;
-		const re = /[a-zA-Z_]/;
+function insert(editor: TextEditor) {
+	const cLike = isCLike(editor.document);
+	const document = editor.document;
+	const re = /[a-zA-Z_]/;
+
+	editor.edit(e => {
+		const pos = beginTypingOperation(editor, e);
 
 		if (!inRegularCode(document, pos)) {
-			e.replace(editor.selection, '-');
+			e.insert(pos, '-');
 		} else if (cLike && charsBehind(document, pos, 1) === '_') {
 			deleteBehind(e, pos, 1);
-			e.replace(editor.selection, '--');
+			e.insert(pos, '--');
 		} else if (cLike && charsBehind(document, pos, 2) === '--') {
 			deleteBehind(e, pos, 2);
-			e.replace(editor.selection, '_--');
+			e.insert(pos, '_--');
 		} else if (charsBehind(document, pos, 1).match(re)) {
-			e.replace(editor.selection, '_');
+			e.insert(pos, '_');
 		} else {
-			e.replace(editor.selection, '-');
+			e.insert(pos, '-');
 		}
 	}).then(() => completeTypingOperation(editor));
 }
@@ -61,24 +65,29 @@ function isCLike(document: TextDocument) {
 	return cLikeLanguages?.includes(document.languageId);
 }
 
-function insertGt(editor: TextEditor | undefined) {
-	editor?.edit(e => {
-		const pos = editor.selection.start;
-		const document = editor.document;
-		if (isCLike(editor.document)
+function insertGt(editor: TextEditor) {
+	const document = editor.document;
+	editor.edit(e => {
+		const pos = beginTypingOperation(editor, e);
+
+		if (isCLike(document)
 			&& inRegularCode(document, pos)
 			&& charsBehind(document, pos, 1) === '_') 
 		{
 			deleteBehind(e, pos, 1);
-			e.replace(editor.selection, '->');
+			e.insert(pos, '->');
 		} else {
-			e.replace(editor.selection, '>');
+			e.insert(pos, '>');
 		}
 	}).then(() => completeTypingOperation(editor));
 }
 
+function beginTypingOperation(editor: TextEditor, e: TextEditorEdit) {
+	e.delete(editor.selection);
+	return editor.selection.start;
+}
+
 function completeTypingOperation(editor: TextEditor) {
-	editor.selection = new Selection(editor.selection.end, editor.selection.end);
 	editor.revealRange(editor.selection, TextEditorRevealType.Default);
 }
 
@@ -91,10 +100,12 @@ function inRegularCode(document: TextDocument, position: Position) {
 	const specialScopes = ['string', 'comment'];
 
 	let tokenScopes = hscopes?.getScopeAt(document, position);
-	for (let scope of tokenScopes?.scopes) {
-		let genericScope = scope?.split('.')[0];
-		if (specialScopes.includes(genericScope)) {
-			return false;
+	if (tokenScopes) {
+		for (let scope of tokenScopes.scopes) {
+			let genericScope = scope.split('.')[0];
+			if (specialScopes.includes(genericScope)) {
+				return false;
+			}
 		}
 	}
 	return true;
