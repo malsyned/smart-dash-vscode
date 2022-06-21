@@ -10,7 +10,7 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:smart-dash.insert"
+		"*"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
