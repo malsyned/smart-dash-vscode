@@ -42,14 +42,14 @@ export function activate(context: ExtensionContext) {
 export function deactivate() { }
 
 function insert(editor: TextEditor) {
-	const cLike = isCLike(editor.document);
+	const cLike = languageIsCLike(editor.document);
 	const document = editor.document;
 	const re = /\w/;
 
 	editor.edit(e => {
 		const pos = beginTypingOperation(editor, e);
 
-		if (!inRegularCode(document, pos)) {
+		if (!smartDashEnabled(document) || !inRegularCode(document, pos)) {
 			e.insert(pos, '-');
 		} else if (cLike && charsBehindEqual(document, pos, '_')) {
 			deleteBehind(e, pos, '_'.length);
@@ -73,9 +73,17 @@ function insertDash(editor: TextEditor)
 	}).then(() => completeTypingOperation(editor));
 }
 
-function isCLike(document: TextDocument) {
+function languageIsCLike(document: TextDocument) {
+	return languageIsInConfigParam(document, "cLikeLanguages");
+}
+
+function smartDashEnabled(document: TextDocument) {
+	return languageIsInConfigParam(document, "languages");
+}
+
+function languageIsInConfigParam(document: TextDocument, param: string) {
 	let cLikeLanguages: Array<string> | undefined =
-		workspace.getConfiguration("smart-dash").get("cLikeLanguages");
+		workspace.getConfiguration("smart-dash").get(param);
 	return cLikeLanguages?.includes(document.languageId);
 }
 
@@ -84,7 +92,8 @@ function insertGt(editor: TextEditor) {
 	editor.edit(e => {
 		const pos = beginTypingOperation(editor, e);
 
-		if (isCLike(document)
+		if (smartDashEnabled(document)
+			&& languageIsCLike(document)
 			&& inRegularCode(document, pos)
 			&& charsBehindEqual(document, pos, '_'))
 		{

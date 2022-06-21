@@ -52,12 +52,39 @@
 					"type": "array",
 					"default": [
 						"c",
+						"coffeescript",
 						"cpp",
+						"csharp",
+						"cuda-cpp",
+						"java",
+						"javascript",
 						"objective-c",
 						"objective-cpp",
-						"csharp"
+						"typescript"
 					],
 					"description": "Languages that need fix-ups for post-decrement \"--\" and struct access \"->\""
+				},
+				"smart-dash.languages": {
+					"type": "array",
+					"default": [
+						"c",
+						"coffeescript",
+						"cpp",
+						"csharp",
+						"cuda-cpp",
+						"java",
+						"javascript",
+						"lua",
+						"objective-c",
+						"objective-cpp",
+						"perl",
+						"perl6",
+						"php",
+						"python",
+						"ruby",
+						"typescript"
+					],
+					"description": "Languages to enable smart-dash functionality for"
 				}
 			}
 		}
