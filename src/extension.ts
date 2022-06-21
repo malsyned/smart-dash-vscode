@@ -73,7 +73,7 @@ function insertGt(editor: TextEditor) {
 			&& inRegularCode(document, pos)
 			&& charsBehindEqual(document, pos, '_'))
 		{
-			deleteBehind(e, pos, 1);
+			deleteBehind(e, pos, '_'.length);
 			e.insert(pos, '->');
 		} else {
 			e.insert(pos, '>');
