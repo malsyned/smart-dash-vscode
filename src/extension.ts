@@ -1,57 +1,110 @@
-import * as vscode from 'vscode';
+import {
+	commands,
+	extensions,
+	window,
+	ExtensionContext,
+	Position,
+	Range,
+	Selection,
+	TextDocument,
+	TextEditor,
+	TextEditorEdit,
+	TextEditorRevealType,
+	workspace,
+} from 'vscode';
 
-export function activate(context: vscode.ExtensionContext) {
-	
-	let disposable = vscode.commands.registerCommand('smart-dash.insert', () => {
-		insert(vscode.window.activeTextEditor);
-	});
+let hscopes = extensions.getExtension('draivin.hscopes')?.exports;
 
-	context.subscriptions.push(disposable);
-}
-
-export function deactivate() {}
-
-function insert(editor: vscode.TextEditor | undefined) {
-	editor?.edit(e => {
-		let c = '-';
-		vscode.commands.executeCommand('vscode.provideDocumentRangeSemanticTokens', editor.document.uri, editor.selection).then(tokens => {
-			console.log(tokens);
+export function activate(context: ExtensionContext) {
+	if (hscopes) {
+		let insertDisposable = commands.registerCommand('smart-dash.insert', () => {
+			insert(window.activeTextEditor);
 		});
-		const prevChar = charsBehind(editor.document, editor.selection.start, 1);
-		if (prevChar.match(/[a-zA-Z_-]/)) {
-			c = '_';
-		}
-		e.replace(editor.selection, c);
-	}).then(() => {
-		editor.selection = new vscode.Selection(editor.selection.end, editor.selection.end);
-	});
+		context.subscriptions.push(insertDisposable);
+
+		let insertGtDisposable = commands.registerCommand('smart-dash.insertGreaterThan', () => {
+			insertGt(window.activeTextEditor);
+		});
+		context.subscriptions.push(insertGtDisposable);
+	}
 }
 
-function charsBehind(document: vscode.TextDocument, 
-	                 position: vscode.Position, 
+export function deactivate() { }
+
+function insert(editor: TextEditor | undefined) {
+	editor?.edit(e => {
+		const cLike = isCLike(editor.document);
+		const sel = editor.selection;
+		const pos = editor.selection.start;
+		const document = editor.document;
+		const re = /[a-zA-Z_]/;
+
+		if (!inRegularCode(document, pos)) {
+			e.replace(editor.selection, '-');
+		} else if (cLike && charsBehind(document, pos, 1) === '_') {
+			deleteBehind(e, pos, 1);
+			e.replace(editor.selection, '--');
+		} else if (cLike && charsBehind(document, pos, 2) === '--') {
+			deleteBehind(e, pos, 2);
+			e.replace(editor.selection, '_--');
+		} else if (charsBehind(document, pos, 1).match(re)) {
+			e.replace(editor.selection, '_');
+		} else {
+			e.replace(editor.selection, '-');
+		}
+	}).then(() => completeTypingOperation(editor));
+}
+
+function isCLike(document: TextDocument) {
+	let cLikeLanguages: Array<string> | undefined =
+		workspace.getConfiguration("smart-dash").get("cLikeLanguages");
+	return cLikeLanguages?.includes(document.languageId);
+}
+
+function insertGt(editor: TextEditor | undefined) {
+	editor?.edit(e => {
+		const pos = editor.selection.start;
+		const document = editor.document;
+		if (isCLike(editor.document)
+			&& inRegularCode(document, pos)
+			&& charsBehind(document, pos, 1) === '_') 
+		{
+			deleteBehind(e, pos, 1);
+			e.replace(editor.selection, '->');
+		} else {
+			e.replace(editor.selection, '>');
+		}
+	}).then(() => completeTypingOperation(editor));
+}
+
+function completeTypingOperation(editor: TextEditor) {
+	editor.selection = new Selection(editor.selection.end, editor.selection.end);
+	editor.revealRange(editor.selection, TextEditorRevealType.Default);
+}
+
+function deleteBehind(e: TextEditorEdit, pos: Position, chars: number) {
+	let range = new Range(pos.line, pos.character - chars, pos.line, pos.character);
+	e.delete(range);
+}
+
+function inRegularCode(document: TextDocument, position: Position) {
+	const specialScopes = ['string', 'comment'];
+
+	let tokenScopes = hscopes?.getScopeAt(document, position);
+	for (let scope of tokenScopes?.scopes) {
+		let genericScope = scope?.split('.')[0];
+		if (specialScopes.includes(genericScope)) {
+			return false;
+		}
+	}
+	return true;
+}
+
+function charsBehind(document: TextDocument,
+					 position: Position,
 					 chars: number): string 
 {
 	let stringStart = document.positionAt(document.offsetAt(position) - chars);
-	let range = new vscode.Range(stringStart, position);
+	let range = new Range(stringStart, position);
 	return document.getText(range);
 }
-/*
-  (let ((ident-re (if smart-dash-c-mode
-                      "[A-Za-z0-9]"
-                    "[A-Za-z0-9_]")))
-    (if (and (funcall regcodepf)
-             (not (funcall bobpf)))
-        (cond ((string-match ident-re (string (funcall char-before-f)))
-               (funcall insertf ?_))
-              ((and smart-dash-c-mode
-                    (eql ?_ (funcall char-before-f)))
-               (funcall deletef 1)
-               (funcall insertf "--"))
-              ((and smart-dash-c-mode
-                    (eql ?- (funcall char-before-f))
-                    (eql ?- (funcall char-before-f -1)))
-               (funcall deletef 2)
-               (funcall insertf "_--"))
-              (t (funcall insertf ?-)))
-      (funcall insertf ?-))))
-*/
