@@ -38,7 +38,7 @@ export function deactivate() { }
 function insert(editor: TextEditor) {
 	const cLike = isCLike(editor.document);
 	const document = editor.document;
-	const re = /[a-zA-Z_]/;
+	const re = /\w/;
 
 	editor.edit(e => {
 		const pos = beginTypingOperation(editor, e);
