@@ -22,6 +22,10 @@
 			{
 				"command": "smart-dash.insertGreaterThan",
 				"title": "Insert Greater-Than or Struct Access"
+			},
+			{
+				"command": "smart-dash.insertDash",
+				"title": "Insert Dash Unconditionally"
 			}
 		],
 		"keybindings": [
@@ -33,6 +37,11 @@
 			{
 				"command": "smart-dash.insertGreaterThan",
 				"key": "shift+.",
+				"when": "editorTextFocus"
+			},
+			{
+				"command": "smart-dash.insertDash",
+				"key": "alt+-",
 				"when": "editorTextFocus"
 			}
 		],

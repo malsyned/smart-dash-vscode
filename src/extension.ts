@@ -29,6 +29,13 @@ export function activate(context: ExtensionContext) {
 			}
 		});
 		context.subscriptions.push(insertGtDisposable);
+
+		let insertDashDisposable = commands.registerCommand('smart-dash.insertDash', () => {
+			if (window.activeTextEditor) {
+				insertDash(window.activeTextEditor);
+			}
+		});
+		context.subscriptions.push(insertDashDisposable);
 	}
 }
 
@@ -55,6 +62,14 @@ function insert(editor: TextEditor) {
 		} else {
 			e.insert(pos, '-');
 		}
+	}).then(() => completeTypingOperation(editor));
+}
+
+function insertDash(editor: TextEditor)
+{
+	editor.edit(e=> {
+		const pos = beginTypingOperation(editor, e);
+		e.insert(pos, '-');
 	}).then(() => completeTypingOperation(editor));
 }
 
