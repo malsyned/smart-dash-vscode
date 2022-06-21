@@ -114,7 +114,7 @@ function charsBehindEqual(document: TextDocument,
 	pos: Position,
 	chars: string): boolean
 {
-return charsBehind(document, pos, chars.length) === chars;
+	return charsBehind(document, pos, chars.length) === chars;
 }
 
 function charsBehind(document: TextDocument,
