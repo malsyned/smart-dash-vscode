@@ -106,7 +106,7 @@ function languageIsInConfigParam(document: TextDocument, param: string) {
 }
 
 function inRegularCode(document: TextDocument, position: Position) {
-	const specialScopes = ['string', 'comment'];
+	const specialScopes = ['string', 'comment', 'numeric'];
 
 	let scopes = hscopes?.getScopeAt(document, position)?.scopes;
 	if (!scopes) {
