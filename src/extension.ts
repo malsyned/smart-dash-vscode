@@ -108,11 +108,14 @@ function languageIsInConfigParam(document: TextDocument, param: string) {
 function inRegularCode(document: TextDocument, position: Position) {
 	const specialScopes = ['string', 'comment'];
 
-	let tokenScopes = hscopes?.getScopeAt(document, position);
-	if (tokenScopes) {
-		for (let scope of tokenScopes.scopes) {
-			let genericScope = scope.split('.')[0];
-			if (specialScopes.includes(genericScope)) {
+	let scopes = hscopes?.getScopeAt(document, position)?.scopes;
+	if (!scopes) {
+		return true;
+	}
+
+	for (let scope of scopes) {
+		for (let part of scope.split('.')) {
+			if (specialScopes.includes(part)) {
 				return false;
 			}
 		}
