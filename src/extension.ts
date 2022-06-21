@@ -5,7 +5,6 @@ import {
 	ExtensionContext,
 	Position,
 	Range,
-	Selection,
 	TextDocument,
 	TextEditor,
 	TextEditorEdit,
