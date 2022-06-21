@@ -45,11 +45,11 @@ function insert(editor: TextEditor) {
 
 		if (!inRegularCode(document, pos)) {
 			e.insert(pos, '-');
-		} else if (cLike && charsBehind(document, pos, 1) === '_') {
-			deleteBehind(e, pos, 1);
+		} else if (cLike && charsBehindEqual(document, pos, '_')) {
+			deleteBehind(e, pos, '_'.length);
 			e.insert(pos, '--');
-		} else if (cLike && charsBehind(document, pos, 2) === '--') {
-			deleteBehind(e, pos, 2);
+		} else if (cLike && charsBehindEqual(document, pos, '--')) {
+			deleteBehind(e, pos, '--'.length);
 			e.insert(pos, '_--');
 		} else if (charsBehind(document, pos, 1).match(re)) {
 			e.insert(pos, '_');
@@ -72,7 +72,7 @@ function insertGt(editor: TextEditor) {
 
 		if (isCLike(document)
 			&& inRegularCode(document, pos)
-			&& charsBehind(document, pos, 1) === '_') 
+			&& charsBehindEqual(document, pos, '_'))
 		{
 			deleteBehind(e, pos, 1);
 			e.insert(pos, '->');
@@ -109,6 +109,13 @@ function inRegularCode(document: TextDocument, position: Position) {
 		}
 	}
 	return true;
+}
+
+function charsBehindEqual(document: TextDocument,
+	pos: Position,
+	chars: string): boolean
+{
+return charsBehind(document, pos, chars.length) === chars;
 }
 
 function charsBehind(document: TextDocument,
