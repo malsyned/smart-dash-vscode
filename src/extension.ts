@@ -65,28 +65,6 @@ function insert(editor: TextEditor) {
 	}).then(() => completeTypingOperation(editor));
 }
 
-function insertDash(editor: TextEditor)
-{
-	editor.edit(e=> {
-		const pos = beginTypingOperation(editor, e);
-		e.insert(pos, '-');
-	}).then(() => completeTypingOperation(editor));
-}
-
-function languageIsCLike(document: TextDocument) {
-	return languageIsInConfigParam(document, "cLikeLanguages");
-}
-
-function smartDashEnabled(document: TextDocument) {
-	return languageIsInConfigParam(document, "languages");
-}
-
-function languageIsInConfigParam(document: TextDocument, param: string) {
-	let cLikeLanguages: Array<string> | undefined =
-		workspace.getConfiguration("smart-dash").get(param);
-	return cLikeLanguages?.includes(document.languageId);
-}
-
 function insertGt(editor: TextEditor) {
 	const document = editor.document;
 	editor.edit(e => {
@@ -105,18 +83,26 @@ function insertGt(editor: TextEditor) {
 	}).then(() => completeTypingOperation(editor));
 }
 
-function beginTypingOperation(editor: TextEditor, e: TextEditorEdit) {
-	e.delete(editor.selection);
-	return editor.selection.start;
+function insertDash(editor: TextEditor)
+{
+	editor.edit(e=> {
+		const pos = beginTypingOperation(editor, e);
+		e.insert(pos, '-');
+	}).then(() => completeTypingOperation(editor));
 }
 
-function completeTypingOperation(editor: TextEditor) {
-	editor.revealRange(editor.selection, TextEditorRevealType.Default);
+function smartDashEnabled(document: TextDocument) {
+	return languageIsInConfigParam(document, "languages");
 }
 
-function deleteBehind(e: TextEditorEdit, pos: Position, chars: number) {
-	let range = new Range(pos.line, pos.character - chars, pos.line, pos.character);
-	e.delete(range);
+function languageIsCLike(document: TextDocument) {
+	return languageIsInConfigParam(document, "cLikeLanguages");
+}
+
+function languageIsInConfigParam(document: TextDocument, param: string) {
+	let cLikeLanguages: Array<string> | undefined =
+		workspace.getConfiguration("smart-dash").get(param);
+	return cLikeLanguages?.includes(document.languageId);
 }
 
 function inRegularCode(document: TextDocument, position: Position) {
@@ -134,6 +120,15 @@ function inRegularCode(document: TextDocument, position: Position) {
 	return true;
 }
 
+function beginTypingOperation(editor: TextEditor, e: TextEditorEdit) {
+	e.delete(editor.selection);
+	return editor.selection.start;
+}
+
+function completeTypingOperation(editor: TextEditor) {
+	editor.revealRange(editor.selection, TextEditorRevealType.Default);
+}
+
 function charsBehindEqual(document: TextDocument,
 	pos: Position,
 	chars: string): boolean
@@ -148,4 +143,9 @@ function charsBehind(document: TextDocument,
 	let stringStart = document.positionAt(document.offsetAt(position) - chars);
 	let range = new Range(stringStart, position);
 	return document.getText(range);
+}
+
+function deleteBehind(e: TextEditorEdit, pos: Position, chars: number) {
+	let range = new Range(pos.line, pos.character - chars, pos.line, pos.character);
+	e.delete(range);
 }
