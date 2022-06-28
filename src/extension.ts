@@ -43,12 +43,9 @@ export function deactivate() { }
 
 function insert(editor: TextEditor) {
 	const cLike = languageIsCLike(editor.document);
-	const document = editor.document;
 	const re = /\w/;
 
-	editor.edit(e => {
-		const pos = beginTypingOperation(editor, e);
-
+	typingOperation(editor, (e, document, pos) => {
 		if (!smartDashEnabled(document) || inVerbatimText(document, pos)) {
 			e.insert(pos, '-');
 		} else if (cLike && charsBehindEqual(document, pos, '_')) {
@@ -62,14 +59,11 @@ function insert(editor: TextEditor) {
 		} else {
 			e.insert(pos, '-');
 		}
-	}).then(() => completeTypingOperation(editor));
+	});
 }
 
 function insertGt(editor: TextEditor) {
-	const document = editor.document;
-	editor.edit(e => {
-		const pos = beginTypingOperation(editor, e);
-
+	typingOperation(editor, (e, document, pos) => {
 		if (smartDashEnabled(document)
 			&& languageIsCLike(document)
 			&& !inVerbatimText(document, pos)
@@ -80,15 +74,14 @@ function insertGt(editor: TextEditor) {
 		} else {
 			e.insert(pos, '>');
 		}
-	}).then(() => completeTypingOperation(editor));
+	});
 }
 
 function insertDash(editor: TextEditor)
 {
-	editor.edit(e=> {
-		const pos = beginTypingOperation(editor, e);
+	typingOperation(editor, (e, document, pos) => {
 		e.insert(pos, '-');
-	}).then(() => completeTypingOperation(editor));
+	});
 }
 
 function smartDashEnabled(document: TextDocument) {
@@ -115,13 +108,14 @@ function inVerbatimText(document: TextDocument, position: Position) {
 	return verbatim;
 }
 
-function beginTypingOperation(editor: TextEditor, e: TextEditorEdit) {
-	e.delete(editor.selection);
-	return editor.selection.start;
-}
-
-function completeTypingOperation(editor: TextEditor) {
-	editor.revealRange(editor.selection, TextEditorRevealType.Default);
+function typingOperation(
+	editor: TextEditor,
+	callback: (editBuilder: TextEditorEdit, doc: TextDocument, pos: Position) => void)
+{
+	editor.edit(e => {
+		e.delete(editor.selection);
+		callback(e, editor.document, editor.selection.start);
+	}).then(() => editor.revealRange(editor.selection, TextEditorRevealType.Default));
 }
 
 function charsBehindEqual(document: TextDocument,
