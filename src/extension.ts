@@ -12,31 +12,27 @@ import {
 	workspace,
 } from 'vscode';
 
-let hscopes = extensions.getExtension('draivin.hscopes')?.exports;
-
 export function activate(context: ExtensionContext) {
-	if (hscopes) {
-		let insertDisposable = commands.registerCommand('smart-dash.insert', () => {
-			if (window.activeTextEditor) {
-				insert(window.activeTextEditor);
-			}
-		});
-		context.subscriptions.push(insertDisposable);
+	let insertDisposable = commands.registerCommand('smart-dash.insert', () => {
+		if (window.activeTextEditor) {
+			insert(window.activeTextEditor);
+		}
+	});
+	context.subscriptions.push(insertDisposable);
 
-		let insertGtDisposable = commands.registerCommand('smart-dash.insertGreaterThan', () => {
-			if (window.activeTextEditor) {
-				insertGt(window.activeTextEditor);
-			}
-		});
-		context.subscriptions.push(insertGtDisposable);
+	let insertGtDisposable = commands.registerCommand('smart-dash.insertGreaterThan', () => {
+		if (window.activeTextEditor) {
+			insertGt(window.activeTextEditor);
+		}
+	});
+	context.subscriptions.push(insertGtDisposable);
 
-		let insertDashDisposable = commands.registerCommand('smart-dash.insertDash', () => {
-			if (window.activeTextEditor) {
-				insertDash(window.activeTextEditor);
-			}
-		});
-		context.subscriptions.push(insertDashDisposable);
-	}
+	let insertDashDisposable = commands.registerCommand('smart-dash.insertDash', () => {
+		if (window.activeTextEditor) {
+			insertDash(window.activeTextEditor);
+		}
+	});
+	context.subscriptions.push(insertDashDisposable);
 }
 
 export function deactivate() { }
@@ -101,11 +97,17 @@ function languageIsInConfigParam(document: TextDocument, param: string) {
 function inVerbatimText(document: TextDocument, position: Position) {
 	const verbatimScopes = ['string', 'comment', 'numeric'];
 
-	let scopes: string[] = hscopes?.getScopeAt(document, position)?.scopes;
-	let parts = scopes?.map(scope => scope.split('.')).flat();
-	let verbatim = parts?.some(part => verbatimScopes.includes(part));
+	let scopes = syntacticScopes(document, position);
+	let parts = scopes.map(scope => scope.split('.')).flat();
+	let verbatim = parts.some(part => verbatimScopes.includes(part));
 
 	return verbatim;
+}
+
+function syntacticScopes(document: TextDocument, position: Position): string[]
+{
+	let hscopes = extensions.getExtension('draivin.hscopes')?.exports;
+	return hscopes?.getScopeAt(document, position)?.scopes || [];
 }
 
 function typingOperation(
