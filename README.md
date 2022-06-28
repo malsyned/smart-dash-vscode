@@ -27,7 +27,7 @@ below](#additional-features-for-c-like-languages)).
 
 However, since its behavior is heuristic, it may not interact well with your
 particular coding style.  If you are in the habit of putting spaces between your
-identifiers and your arithmetic operators as in "`foo - 7`" then you'll probably
+identifiers and your arithmetic operators as in "`foo - 7`" then you'll probably
 get along with Smart-Dash just fine.  If, however, you frequently write
 close expressions like "`x-3`", Smart-Dash might not be the right fit for
 you.
