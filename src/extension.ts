@@ -13,29 +13,25 @@ import {
 } from 'vscode';
 
 export function activate(context: ExtensionContext) {
-	let insertDisposable = commands.registerCommand('smart-dash.insert', () => {
-		if (window.activeTextEditor) {
-			insert(window.activeTextEditor);
-		}
-	});
-	context.subscriptions.push(insertDisposable);
-
-	let insertGtDisposable = commands.registerCommand('smart-dash.insertGreaterThan', () => {
-		if (window.activeTextEditor) {
-			insertGt(window.activeTextEditor);
-		}
-	});
-	context.subscriptions.push(insertGtDisposable);
-
-	let insertDashDisposable = commands.registerCommand('smart-dash.insertDash', () => {
-		if (window.activeTextEditor) {
-			insertDash(window.activeTextEditor);
-		}
-	});
-	context.subscriptions.push(insertDashDisposable);
+	registerTextEditorCommand(context, 'smart-dash.insert', insert);
+	registerTextEditorCommand(context, 'smart-dash.insertGreaterThan', insertGt);
+	registerTextEditorCommand(context, 'smart-dash.insertDash', insertDash);
 }
 
 export function deactivate() { }
+
+function registerTextEditorCommand(
+	context: ExtensionContext,
+	command: string,
+	callback: (editor: TextEditor) => void)
+{
+	let disposable = commands.registerCommand(command, () => {
+		if (window.activeTextEditor) {
+			callback(window.activeTextEditor);
+		}
+	});
+	context.subscriptions.push(disposable);
+}
 
 function insert(editor: TextEditor) {
 	const cLike = languageIsCLike(editor.document);
