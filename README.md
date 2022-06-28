@@ -13,7 +13,7 @@ just type your code like you normally would, but stop pressing the shift key
 when you need an underscore inside an identifier.
 
 If you need to type a literal dash right after an identifier (say, to type a
-cramped arithmetic expression like `x-3`), use the minus key on the number pad.
+cramped arithmetic expression like `x-3`), use `Alt+-` or the minus key on the number pad.
 
 ## Will It Get in My Way?
 
