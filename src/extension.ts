@@ -49,7 +49,7 @@ function insert(editor: TextEditor) {
 	editor.edit(e => {
 		const pos = beginTypingOperation(editor, e);
 
-		if (!smartDashEnabled(document) || !inRegularCode(document, pos)) {
+		if (!smartDashEnabled(document) || inVerbatimText(document, pos)) {
 			e.insert(pos, '-');
 		} else if (cLike && charsBehindEqual(document, pos, '_')) {
 			deleteBehind(e, pos, '_'.length);
@@ -72,7 +72,7 @@ function insertGt(editor: TextEditor) {
 
 		if (smartDashEnabled(document)
 			&& languageIsCLike(document)
-			&& inRegularCode(document, pos)
+			&& !inVerbatimText(document, pos)
 			&& charsBehindEqual(document, pos, '_'))
 		{
 			deleteBehind(e, pos, '_'.length);
@@ -105,22 +105,14 @@ function languageIsInConfigParam(document: TextDocument, param: string) {
 	return cLikeLanguages?.includes(document.languageId);
 }
 
-function inRegularCode(document: TextDocument, position: Position) {
-	const specialScopes = ['string', 'comment', 'numeric'];
+function inVerbatimText(document: TextDocument, position: Position) {
+	const verbatimScopes = ['string', 'comment', 'numeric'];
 
-	let scopes = hscopes?.getScopeAt(document, position)?.scopes;
-	if (!scopes) {
-		return true;
-	}
+	let scopes: string[] = hscopes?.getScopeAt(document, position)?.scopes;
+	let parts = scopes?.map(scope => scope.split('.')).flat();
+	let verbatim = parts?.some(part => verbatimScopes.includes(part));
 
-	for (let scope of scopes) {
-		for (let part of scope.split('.')) {
-			if (specialScopes.includes(part)) {
-				return false;
-			}
-		}
-	}
-	return true;
+	return verbatim;
 }
 
 function beginTypingOperation(editor: TextEditor, e: TextEditorEdit) {
