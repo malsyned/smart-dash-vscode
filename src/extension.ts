@@ -90,20 +90,20 @@ function languageIsInConfigParam(document: TextDocument, param: string) {
 	return cLikeLanguages?.includes(document.languageId);
 }
 
-function inVerbatimText(document: TextDocument, position: Position) {
+function inVerbatimText(document: TextDocument, pos: Position) {
 	const verbatimScopes = ['string', 'comment', 'numeric'];
 
-	let scopes = syntacticScopes(document, position);
+	let scopes = syntacticScopes(document, pos);
 	let parts = scopes.map(scope => scope.split('.')).flat();
 	let verbatim = parts.some(part => verbatimScopes.includes(part));
 
 	return verbatim;
 }
 
-function syntacticScopes(document: TextDocument, position: Position): string[]
+function syntacticScopes(document: TextDocument, pos: Position): string[]
 {
 	let hscopes = extensions.getExtension('draivin.hscopes')?.exports;
-	return hscopes?.getScopeAt(document, position)?.scopes || [];
+	return hscopes?.getScopeAt(document, pos)?.scopes || [];
 }
 
 function typingOperation(
@@ -123,12 +123,10 @@ function charsBehindEqual(document: TextDocument,
 	return charsBehind(document, pos, chars.length) === chars;
 }
 
-function charsBehind(document: TextDocument,
-					 position: Position,
-					 chars: number): string
+function charsBehind(document: TextDocument, pos: Position, chars: number): string
 {
-	let stringStart = document.positionAt(document.offsetAt(position) - chars);
-	let range = new Range(stringStart, position);
+	let stringStart = document.positionAt(document.offsetAt(pos) - chars);
+	let range = new Range(stringStart, pos);
 	return document.getText(range);
 }
 
