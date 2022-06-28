@@ -17,7 +17,7 @@ cramped arithmetic expression like `x-3`), use `Alt+-` or the minus key on the n
 
 ## Will It Get in My Way?
 
-TL;DR: no, not if you put spaces around `-` used for subtraction.
+TL;DR: no, not if you put spaces around "`-`" used for subtraction.
 
 In creating Smart-Dash I've tried to make sure that it doesn't get in your way.
 For example, Smart-Dash uses the syntax information provided by the current
