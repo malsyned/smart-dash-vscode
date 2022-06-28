@@ -36,8 +36,8 @@ you.
 
 C has two situations where almost all developers and style guides put a dash
 directly after an identifier.  They are the `->` struct access operator and the
-postfix `--` post-decrement operator.  In C-like language modes that uses these
-operators, it activates two workarounds.
+postfix `--` post-decrement operator.  In C-like languages that use these
+operators, Smart-Dash activates two workarounds.
 
 The first is that if you type `>` after an underscore, the underscore will be
 replaced with a dash.  The typical sequence of operations, then, looks like
@@ -53,8 +53,8 @@ this:
 ![Smart-Dash C postfix decrement](media/smart-dash-c-postfix-dec.gif)
 
 This requires that if you want a double-underscore in your identifier in a
-C-like mode, you will have to type it yourself. As for the rare case where you
-want to type `__foo__--`, Smart-Dash mode attempts to detect and handle it.  It
+C-like language, you will have to type it yourself. As for the rare case where you
+want to type `__foo__--`, Smart-Dash attempts to detect and handle it.  It
 looks like this:
 
 ![Smart-Dash C postfix decrement after underscore](media/smart-dash-c-dunder-dec.gif)
@@ -71,4 +71,4 @@ JavaScript, and related languages. This list is customizable via the settings.
 
 ### 1.0.0
 
-Initial release of Smart-Dash Mode
+Initial release of Smart-Dash
