@@ -1,70 +1,74 @@
-# smart-dash README
+# Smart-Dash
 
-This is the README for your extension "smart-dash". After writing up a brief description, we recommend including the following sections.
+Smart-Dash redefines the dash key to insert an underscore within C-style
+identifiers and a dash otherwise.
 
-## Features
+The goal is to allow you to type the `underscore_separated_identifiers` that are
+common in C, Python or PHP as comfortably as you would type
+`lisp-style-identifiers`.
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+## Usage
 
-For example if there is an image subfolder under your extension project workspace:
+just type your code like you normally would, but stop pressing the shift key
+when you need an underscore inside an identifier.
 
-\!\[feature X\]\(images/feature-x.png\)
+If you need to type a literal dash right after an identifier (say, to type a
+cramped arithmetic expression like `x-3`), use the minus key on the number pad.
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+## Will It Get in My Way?
 
-## Requirements
+TL;DR: no, not if you put spaces around `-` used for subtraction.
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+In creating Smart-Dash I've tried to make sure that it doesn't get in your way.
+For example, Smart-Dash uses the syntax information provided by the current
+language mode to always insert a dash inside strings and comments, and has
+special cases for common idioms in C-like languages ([described
+below](#additional-features-for-c-like-languages)).
+
+However, since its behavior is heuristic, it may not interact well with your
+particular coding style.  If you are in the habit of putting spaces between your
+identifiers and your arithmetic operators as in "`foo - 7`" then you'll probably
+get along with Smart-Dash just fine.  If, however, you frequently write
+close expressions like "`x-3`", Smart-Dash might not be the right fit for
+you.
+
+## Additional Features for C-Like Languages
+
+C has two situations where almost all developers and style guides put a dash
+directly after an identifier.  They are the `->` struct access operator and the
+postfix `--` post-decrement operator.  In C-like language modes that uses these
+operators, it activates two workarounds.
+
+The first is that if you type `>` after an underscore, the underscore will be
+replaced with a dash.  The typical sequence of operations, then, looks like
+this:
+
+![Smart-Dash C struct access](media/smart-dash-c-struct.gif)
+
+The second is a little more complicated, but I've found that it works in all
+syntactically-valid scenarios.  If you type a dash and the previous character is
+an underscore, both characters are replaced by dashes.  That sequence looks like
+this:
+
+![Smart-Dash C postfix decrement](media/smart-dash-c-postfix-dec.gif)
+
+This requires that if you want a double-underscore in your identifier in a
+C-like mode, you will have to type it yourself. As for the rare case where you
+want to type `__foo__--`, Smart-Dash mode attempts to detect and handle it.  It
+looks like this:
+
+![Smart-Dash C postfix decrement after underscore](media/smart-dash-c-dunder-dec.gif)
+
+By default, these workarounds are activated for C, C++, Objective C, Java,
+JavaScript, and related languages. This list is customizable via the settings.
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
+* `smart-dash.languages`: The set of language modes for which to activate Smart-Dash
+* `smart-dash.cLikeLanguages`: The set of language modes for which to activate additional [C-specific features](#additional-features-for-c-like-languages)
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
-
 ### 1.0.0
 
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
------------------------------------------------------------------------------------------------------------
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
-
-### For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+Initial release of Smart-Dash Mode

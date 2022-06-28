@@ -1,0 +1,5 @@
+The "chronicler" extension records the entire window, but I wanted a GIF of only the relevant typing. The following are the commands that I used to perform that conversion, but they are heavily dependent on the specific window dimensions, and will have to be modified if these commands are ever to be run again on different source recordings.
+
+ffmpeg -i smart-dash-c-struct.mp4 -vf fps=10,crop=100:14:99:55,scale=150:24:flags=lanczos,palettegen=stats_mode=diff -y palette-gen.png
+
+ffmpeg -i smart-dash-c-struct.mp4 -i palette-gen.png -lavfi "crop=100:14:99:55,fps=10,scale=150:21:flags=lanczos,paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle" -y smart-dash-c-struct.gif
