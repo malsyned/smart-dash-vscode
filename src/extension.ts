@@ -129,7 +129,7 @@ function charsBehindEqual(document: TextDocument,
 
 function charsBehind(document: TextDocument,
 					 position: Position,
-					 chars: number): string 
+					 chars: number): string
 {
 	let stringStart = document.positionAt(document.offsetAt(position) - chars);
 	let range = new Range(stringStart, position);
