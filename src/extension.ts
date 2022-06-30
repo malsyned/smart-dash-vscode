@@ -1,3 +1,4 @@
+import { getVSCodeDownloadUrl } from '@vscode/test-electron/out/util';
 import {
 	commands,
 	extensions,
@@ -10,6 +11,7 @@ import {
 	TextEditorEdit,
 	TextEditorRevealType,
 	workspace,
+	CompletionList,
 } from 'vscode';
 
 export function activate(context: ExtensionContext) {
@@ -34,10 +36,11 @@ function registerTextEditorCommand(
 }
 
 function insert(editor: TextEditor) {
-	const cLike = languageIsCLike(editor.document);
-	const re = /\w/;
-
 	typingOperation(editor, (e, document, pos) => {
+		const identRegEx = /\w/;
+		const cLike = languageIsCLike(document);
+		let suggest = false;
+
 		if (!smartDashEnabled(document) || inVerbatimText(document, pos)) {
 			e.insert(pos, '-');
 		} else if (cLike && charsBehindEqual(document, pos, '_')) {
@@ -46,11 +49,13 @@ function insert(editor: TextEditor) {
 		} else if (cLike && charsBehindEqual(document, pos, '--')) {
 			deleteBehind(e, pos, '--'.length);
 			e.insert(pos, '_--');
-		} else if (charsBehind(document, pos, 1).match(re)) {
+		} else if (charsBehind(document, pos, 1).match(identRegEx)) {
 			e.insert(pos, '_');
+			suggest = true;
 		} else {
 			e.insert(pos, '-');
 		}
+		return suggest;
 	});
 }
 
@@ -63,8 +68,11 @@ function insertGt(editor: TextEditor) {
 		{
 			deleteBehind(e, pos, '_'.length);
 			e.insert(pos, '->');
+			return true;
 		} else {
+			let result = charsBehindEqual(document, pos, '-');
 			e.insert(pos, '>');
+			return result;
 		}
 	});
 }
@@ -73,6 +81,7 @@ function insertDash(editor: TextEditor)
 {
 	typingOperation(editor, (e, document, pos) => {
 		e.insert(pos, '-');
+		return false;
 	});
 }
 
@@ -106,14 +115,29 @@ function syntacticScopes(document: TextDocument, pos: Position): string[]
 	return hscopes?.getScopeAt(document, pos)?.scopes || [];
 }
 
-function typingOperation(
+async function typingOperation(
 	editor: TextEditor,
-	callback: (editBuilder: TextEditorEdit, doc: TextDocument, pos: Position) => void)
+	callback: (editBuilder: TextEditorEdit, doc: TextDocument, pos: Position) => boolean)
 {
-	editor.edit(e => {
+	let suggest!: boolean;
+
+	await editor.edit(e => {
 		e.delete(editor.selection);
-		callback(e, editor.document, editor.selection.start);
-	}).then(() => editor.revealRange(editor.selection, TextEditorRevealType.Default));
+		suggest = callback(e, editor.document, editor.selection.start);
+	});
+	editor.revealRange(editor.selection, TextEditorRevealType.Default);
+
+	if (!suggest) {
+		return;
+	}
+	let cl = await commands.executeCommand<CompletionList>(
+		'vscode.executeCompletionItemProvider',
+		editor.document.uri, editor.selection.active, undefined, 1);
+	if (!cl.items) {
+		return;
+	}
+
+	await commands.executeCommand('editor.action.triggerSuggest');
 }
 
 function charsBehindEqual(document: TextDocument,
