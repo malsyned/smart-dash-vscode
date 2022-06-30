@@ -124,7 +124,7 @@ async function typingOperation(
 	await editor.edit(e => {
 		e.delete(editor.selection);
 		suggest = callback(e, editor.document, editor.selection.start);
-	});
+	}, {undoStopBefore: false, undoStopAfter: false});
 	editor.revealRange(editor.selection, TextEditorRevealType.Default);
 
 	if (!suggest) {
