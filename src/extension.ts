@@ -130,10 +130,10 @@ async function typingOperation(
 	if (!suggest) {
 		return;
 	}
-	let cl = await commands.executeCommand<CompletionList>(
+	let completions = await commands.executeCommand<CompletionList>(
 		'vscode.executeCompletionItemProvider',
 		editor.document.uri, editor.selection.active, undefined, 1);
-	if (!cl.items) {
+	if (!completions.items) {
 		return;
 	}
 
