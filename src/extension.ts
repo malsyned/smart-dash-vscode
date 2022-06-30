@@ -1,4 +1,3 @@
-import { getVSCodeDownloadUrl } from '@vscode/test-electron/out/util';
 import {
 	commands,
 	extensions,
