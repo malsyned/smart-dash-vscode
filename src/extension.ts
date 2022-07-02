@@ -14,75 +14,72 @@ import {
 } from 'vscode';
 
 export function activate(context: ExtensionContext) {
-	registerTextEditorCommand(context, 'smart-dash.insert', insert);
-	registerTextEditorCommand(context, 'smart-dash.insertGreaterThan', insertGt);
-	registerTextEditorCommand(context, 'smart-dash.insertDash', insertDash);
+	registerTypingCommand(context, 'smart-dash.insert', insert);
+	registerTypingCommand(context, 'smart-dash.insertGreaterThan', insertGt);
+	registerTypingCommand(context, 'smart-dash.insertDash', insertDash);
 }
 
 export function deactivate() { }
 
-function registerTextEditorCommand(
+function registerTypingCommand(
 	context: ExtensionContext,
 	command: string,
-	callback: (editor: TextEditor) => void)
+	callback: (editBuilder: TextEditorEdit, doc: TextDocument, pos: Position) => boolean)
 {
 	let disposable = commands.registerCommand(command, () => {
 		if (window.activeTextEditor) {
-			callback(window.activeTextEditor);
+			typingOperation(window.activeTextEditor, callback);
 		}
 	});
 	context.subscriptions.push(disposable);
 }
 
-function insert(editor: TextEditor) {
-	typingOperation(editor, (e, document, pos) => {
-		const identRegEx = /\w/;
-		const cLike = languageIsCLike(document);
-		let suggest = false;
-
-		if (!smartDashEnabled(document) || inVerbatimText(document, pos)) {
-			e.insert(pos, '-');
-		} else if (cLike && charsBehindEqual(document, pos, '_')) {
-			deleteBehind(e, pos, '_'.length);
-			e.insert(pos, '--');
-		} else if (cLike && charsBehindEqual(document, pos, '--')) {
-			deleteBehind(e, pos, '--'.length);
-			e.insert(pos, '_--');
-		} else if (charsBehind(document, pos, 1).match(identRegEx)) {
-			e.insert(pos, '_');
-			suggest = true;
-		} else {
-			e.insert(pos, '-');
-		}
-		return suggest;
-	});
-}
-
-function insertGt(editor: TextEditor) {
-	typingOperation(editor, (e, document, pos) => {
-		if (smartDashEnabled(document)
-			&& languageIsCLike(document)
-			&& !inVerbatimText(document, pos)
-			&& charsBehindEqual(document, pos, '_'))
-		{
-			deleteBehind(e, pos, '_'.length);
-			e.insert(pos, '->');
-			return true;
-		} else {
-			let result = charsBehindEqual(document, pos, '-');
-			e.insert(pos, '>');
-			return result;
-		}
-	});
-}
-
-function insertDash(editor: TextEditor)
+function insert(e: TextEditorEdit, document: TextDocument, pos: Position)
 {
-	typingOperation(editor, (e, document, pos) => {
+	const identRegEx = /\w/;
+	const cLike = languageIsCLike(document);
+	let suggest = false;
+
+	if (!smartDashEnabled(document) || inVerbatimText(document, pos)) {
 		e.insert(pos, '-');
-		return false;
-	});
+	} else if (cLike && charsBehindEqual(document, pos, '_')) {
+		deleteBehind(e, pos, '_'.length);
+		e.insert(pos, '--');
+	} else if (cLike && charsBehindEqual(document, pos, '--')) {
+		deleteBehind(e, pos, '--'.length);
+		e.insert(pos, '_--');
+	} else if (charsBehind(document, pos, 1).match(identRegEx)) {
+		e.insert(pos, '_');
+		suggest = true;
+	} else {
+		e.insert(pos, '-');
+	}
+	return suggest;
 }
+
+function insertGt(e: TextEditorEdit, document: TextDocument, pos: Position)
+{
+	if (smartDashEnabled(document)
+		&& languageIsCLike(document)
+		&& !inVerbatimText(document, pos)
+		&& charsBehindEqual(document, pos, '_'))
+	{
+		deleteBehind(e, pos, '_'.length);
+		e.insert(pos, '->');
+		return true;
+	} else {
+		let result = charsBehindEqual(document, pos, '-');
+		e.insert(pos, '>');
+		return result;
+	}
+}
+
+function insertDash(e: TextEditorEdit, document: TextDocument, pos: Position)
+{
+	e.insert(pos, '-');
+	return false;
+}
+
 
 function smartDashEnabled(document: TextDocument) {
 	return languageIsInConfigParam(document, "languages");
