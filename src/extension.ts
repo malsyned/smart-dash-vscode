@@ -24,7 +24,7 @@ export function deactivate() { }
 function registerTypingCommand(
 	context: ExtensionContext,
 	command: string,
-	callback: (editBuilder: TextEditorEdit, doc: TextDocument, pos: Position) => boolean)
+	callback: (edit: TextEditorEdit, doc: TextDocument, pos: Position) => boolean)
 {
 	let disposable = commands.registerCommand(command, () => {
 		if (window.activeTextEditor) {
@@ -34,92 +34,92 @@ function registerTypingCommand(
 	context.subscriptions.push(disposable);
 }
 
-function insert(e: TextEditorEdit, document: TextDocument, pos: Position)
+function insert(edit: TextEditorEdit, doc: TextDocument, pos: Position)
 {
 	const identRegEx = /\w/;
-	const cLike = languageIsCLike(document);
+	const cLike = languageIsCLike(doc);
 	let suggest = false;
 
-	if (!smartDashEnabled(document) || inVerbatimText(document, pos)) {
-		e.insert(pos, '-');
-	} else if (cLike && charsBehindEqual(document, pos, '_')) {
-		deleteBehind(e, pos, '_'.length);
-		e.insert(pos, '--');
-	} else if (cLike && charsBehindEqual(document, pos, '--')) {
-		deleteBehind(e, pos, '--'.length);
-		e.insert(pos, '_--');
-	} else if (charsBehind(document, pos, 1).match(identRegEx)) {
-		e.insert(pos, '_');
+	if (!smartDashEnabled(doc) || inVerbatimText(doc, pos)) {
+		edit.insert(pos, '-');
+	} else if (cLike && charsBehindEqual(doc, pos, '_')) {
+		deleteBehind(edit, pos, '_'.length);
+		edit.insert(pos, '--');
+	} else if (cLike && charsBehindEqual(doc, pos, '--')) {
+		deleteBehind(edit, pos, '--'.length);
+		edit.insert(pos, '_--');
+	} else if (charsBehind(doc, pos, 1).match(identRegEx)) {
+		edit.insert(pos, '_');
 		suggest = true;
 	} else {
-		e.insert(pos, '-');
+		edit.insert(pos, '-');
 	}
 	return suggest;
 }
 
-function insertGt(e: TextEditorEdit, document: TextDocument, pos: Position)
+function insertGt(edit: TextEditorEdit, doc: TextDocument, pos: Position)
 {
-	if (smartDashEnabled(document)
-		&& languageIsCLike(document)
-		&& !inVerbatimText(document, pos)
-		&& charsBehindEqual(document, pos, '_'))
+	if (smartDashEnabled(doc)
+		&& languageIsCLike(doc)
+		&& !inVerbatimText(doc, pos)
+		&& charsBehindEqual(doc, pos, '_'))
 	{
-		deleteBehind(e, pos, '_'.length);
-		e.insert(pos, '->');
+		deleteBehind(edit, pos, '_'.length);
+		edit.insert(pos, '->');
 		return true;
 	} else {
-		let result = charsBehindEqual(document, pos, '-');
-		e.insert(pos, '>');
+		let result = charsBehindEqual(doc, pos, '-');
+		edit.insert(pos, '>');
 		return result;
 	}
 }
 
-function insertDash(e: TextEditorEdit, document: TextDocument, pos: Position)
+function insertDash(edit: TextEditorEdit, doc: TextDocument, pos: Position)
 {
-	e.insert(pos, '-');
+	edit.insert(pos, '-');
 	return false;
 }
 
 
-function smartDashEnabled(document: TextDocument) {
-	return languageIsInConfigParam(document, "languages");
+function smartDashEnabled(doc: TextDocument) {
+	return languageIsInConfigParam(doc, "languages");
 }
 
-function languageIsCLike(document: TextDocument) {
-	return languageIsInConfigParam(document, "cLikeLanguages");
+function languageIsCLike(doc: TextDocument) {
+	return languageIsInConfigParam(doc, "cLikeLanguages");
 }
 
-function languageIsInConfigParam(document: TextDocument, param: string) {
+function languageIsInConfigParam(doc: TextDocument, param: string) {
 	let cLikeLanguages: Array<string> | undefined =
 		workspace.getConfiguration("smart-dash").get(param);
-	return cLikeLanguages?.includes(document.languageId);
+	return cLikeLanguages?.includes(doc.languageId);
 }
 
-function inVerbatimText(document: TextDocument, pos: Position) {
+function inVerbatimText(doc: TextDocument, pos: Position) {
 	const verbatimScopes = ['string', 'comment', 'numeric'];
 
-	let scopes = syntacticScopes(document, pos);
+	let scopes = syntacticScopes(doc, pos);
 	let parts = scopes.map(scope => scope.split('.')).flat();
 	let verbatim = parts.some(part => verbatimScopes.includes(part));
 
 	return verbatim;
 }
 
-function syntacticScopes(document: TextDocument, pos: Position): string[]
+function syntacticScopes(doc: TextDocument, pos: Position): string[]
 {
 	let hscopes = extensions.getExtension('draivin.hscopes')?.exports;
-	return hscopes?.getScopeAt(document, pos)?.scopes || [];
+	return hscopes?.getScopeAt(doc, pos)?.scopes || [];
 }
 
 async function typingOperation(
 	editor: TextEditor,
-	callback: (editBuilder: TextEditorEdit, doc: TextDocument, pos: Position) => boolean)
+	callback: (edit: TextEditorEdit, doc: TextDocument, pos: Position) => boolean)
 {
 	let suggest!: boolean;
 
-	await editor.edit(e => {
-		e.delete(editor.selection);
-		suggest = callback(e, editor.document, editor.selection.start);
+	await editor.edit(edit => {
+		edit.delete(editor.selection);
+		suggest = callback(edit, editor.document, editor.selection.start);
 	}, {undoStopBefore: false, undoStopAfter: false});
 	editor.revealRange(editor.selection, TextEditorRevealType.Default);
 
@@ -136,18 +136,18 @@ async function typingOperation(
 	await commands.executeCommand('editor.action.triggerSuggest');
 }
 
-function charsBehindEqual(document: TextDocument,
+function charsBehindEqual(doc: TextDocument,
 	pos: Position,
 	chars: string): boolean
 {
-	return charsBehind(document, pos, chars.length) === chars;
+	return charsBehind(doc, pos, chars.length) === chars;
 }
 
-function charsBehind(document: TextDocument, pos: Position, chars: number): string
+function charsBehind(doc: TextDocument, pos: Position, chars: number): string
 {
-	let stringStart = document.positionAt(document.offsetAt(pos) - chars);
+	let stringStart = doc.positionAt(doc.offsetAt(pos) - chars);
 	let range = new Range(stringStart, pos);
-	return document.getText(range);
+	return doc.getText(range);
 }
 
 function deleteBehind(e: TextEditorEdit, pos: Position, chars: number) {
