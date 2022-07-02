@@ -132,7 +132,7 @@ async function typingOperation(
 	let completions = await commands.executeCommand<CompletionList>(
 		'vscode.executeCompletionItemProvider',
 		editor.document.uri, editor.selection.active, undefined, 1);
-	if (!completions.items) {
+	if (!completions.items.length) {
 		return;
 	}
 
