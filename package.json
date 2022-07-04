@@ -28,19 +28,19 @@
 		],
 		"keybindings": [
 			{
-				"command": "smart-dash.insert",
 				"key": "-",
+				"command": "smart-dash.insert",
 				"when": "editorTextFocus"
 			},
 			{
-				"command": "smart-dash.insertGreaterThan",
 				"key": "shift+.",
+				"command": "smart-dash.insertGreaterThan",
 				"when": "editorTextFocus"
 			},
 			{
+				"key": "alt+-",
 				"command": "type",
 				"args": {"text": "-"},
-				"key": "alt+-",
 				"when": "editorTextFocus"
 			}
 		],
