@@ -96,9 +96,9 @@ function languageIsCLike(doc: TextDocument) {
 }
 
 function languageIsInConfigParam(doc: TextDocument, param: string) {
-	let languages: Array<string> | undefined =
-		workspace.getConfiguration("smart-dash").get(param);
-	return languages?.includes(doc.languageId);
+	let languages: Array<string> =
+		workspace.getConfiguration("smart-dash").get(param) || [];
+	return languages.includes(doc.languageId);
 }
 
 function inVerbatimText(doc: TextDocument, pos: Position) {
