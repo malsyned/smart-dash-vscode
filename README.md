@@ -43,21 +43,30 @@ The first is that if you type `>` after an underscore, the underscore will be
 replaced with a dash.  The typical sequence of operations, then, looks like
 this:
 
-![Smart-Dash C struct access](media/smart-dash-c-struct.gif)
+![Smart-Dash C struct access](media/smart-dash-c-struct.gif "foo
+foo_
+foo->
+foo->bar")
 
 The second is a little more complicated, but I've found that it works in all
 syntactically-valid scenarios.  If you type a dash and the previous character is
 an underscore, both characters are replaced by dashes.  That sequence looks like
 this:
 
-![Smart-Dash C postfix decrement](media/smart-dash-c-postfix-dec.gif)
+![Smart-Dash C postfix decrement](media/smart-dash-c-postfix-dec.gif "foo
+foo_
+foo--")
 
 This requires that if you want a double-underscore in your identifier in a
 C-like language, you will have to type it yourself. As for the rare case where you
 want to type `__foo__--`, Smart-Dash attempts to detect and handle it.  It
 looks like this:
 
-![Smart-Dash C postfix decrement after underscore](media/smart-dash-c-dunder-dec.gif)
+![Smart-Dash C postfix decrement after underscore](media/smart-dash-c-dunder-dec.gif "__foo
+__foo_
+__foo--
+__foo_--
+__foo__--")
 
 By default, these workarounds are activated for C, C++, Objective C, Java,
 JavaScript, and related languages. This list is customizable via the settings.
