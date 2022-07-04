@@ -40,12 +40,13 @@ function registerCommand(
 async function insert(editor: TextEditor, doc: TextDocument, pos: Position) {
 	const identRegEx = /\w/;
 
-	await fixupCLike(editor, doc, pos);
+	if (!smartDashIsAllowed(doc, pos)) {
+		type('-');
+		return;
+	}
 
-	if (smartDashEnabled(doc)
-		&& !inVerbatimText(doc, pos)
-		&& charsBehind(doc, pos, 1).match(identRegEx))
-	{
+	await fixupCLike(editor, doc, pos);
+	if (charsBehind(doc, pos, 1).match(identRegEx)) {
 		await type('_');
 	} else {
 		await type('-');
@@ -53,19 +54,15 @@ async function insert(editor: TextEditor, doc: TextDocument, pos: Position) {
 }
 
 async function insertGt(editor: TextEditor, doc: TextDocument, pos: Position) {
-	await fixupCLike(editor, doc, pos);
+	if (smartDashIsAllowed(doc, pos)) {
+		await fixupCLike(editor, doc, pos);
+	}
 	await type('>');
-}
-
-async function type(text: string) {
-	await commands.executeCommand('type', {text: text});
 }
 
 async function fixupCLike(editor: TextEditor, doc: TextDocument, pos: Position)
 {
-	if (!smartDashEnabled(doc)
-		|| inVerbatimText(doc, pos)
-		|| !languageIsCLike(doc))
+	if (!languageIsCLike(doc))
 	{
 		return;
 	}
@@ -77,6 +74,10 @@ async function fixupCLike(editor: TextEditor, doc: TextDocument, pos: Position)
 	}
 }
 
+async function type(text: string) {
+	await commands.executeCommand('type', {text: text});
+}
+
 async function replaceLeft(editor: TextEditor, chars: string) {
 	const end = editor.selection.start;
 	const start = end.translate(undefined, -chars.length);
@@ -85,6 +86,10 @@ async function replaceLeft(editor: TextEditor, chars: string) {
 	await editor.edit(
 		editBuilder => editBuilder.replace(range, chars),
 		{undoStopBefore: false, undoStopAfter: false});
+}
+
+function smartDashIsAllowed(doc: TextDocument, pos: Position): boolean {
+	return smartDashEnabled(doc) && !inVerbatimText(doc, pos);
 }
 
 function smartDashEnabled(doc: TextDocument) {
