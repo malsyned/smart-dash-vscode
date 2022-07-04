@@ -76,7 +76,7 @@ async function replaceLeft(editor: TextEditor, chars: string) {
 	const start = end.translate(undefined, -chars.length);
 	const range = new Range(start, end);
 
-	await editor?.edit(
+	await editor.edit(
 		editBuilder => editBuilder.replace(range, chars),
 		{undoStopBefore: false, undoStopAfter: false});
 }
