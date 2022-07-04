@@ -39,18 +39,16 @@ function registerCommand(
 
 async function insert(editor: TextEditor, doc: TextDocument, pos: Position) {
     const identRegEx = /\w/;
+    let dashOrUnderscore = '-';
 
-    if (!smartDashIsAllowed(doc, pos)) {
-        type('-');
-        return;
+    if (smartDashIsAllowed(doc, pos)) {
+        await fixupCLike(editor, doc, pos);
+        if (charsBehind(doc, pos, 1).match(identRegEx)) {
+            dashOrUnderscore = '_';
+        }
     }
 
-    await fixupCLike(editor, doc, pos);
-    if (charsBehind(doc, pos, 1).match(identRegEx)) {
-        await type('_');
-    } else {
-        await type('-');
-    }
+    await type(dashOrUnderscore);
 }
 
 async function insertGt(editor: TextEditor, doc: TextDocument, pos: Position) {
