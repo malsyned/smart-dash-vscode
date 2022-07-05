@@ -3,7 +3,7 @@
 	"displayName": "Smart-Dash",
 	"description": "Smartly replace dashes with underscores in identifiers",
 	"icon": "media/icon.png",
-	"version": "0.0.2",
+	"version": "1.0.0",
 	"publisher": "malsyned",
 	"repository": "https://github.com/malsyned/smart-dash-vscode",
 	"license": "GPL-2.0-or-later",
@@ -42,7 +42,9 @@
 			{
 				"key": "alt+-",
 				"command": "type",
-				"args": {"text": "-"},
+				"args": {
+					"text": "-"
+				},
 				"when": "editorTextFocus"
 			}
 		],
@@ -112,5 +114,7 @@
 		"@vscode/test-electron": "^2.1.3"
 	},
 	"dependencies": {},
-	"extensionDependencies": ["draivin.hscopes"]
+	"extensionDependencies": [
+		"draivin.hscopes"
+	]
 }
