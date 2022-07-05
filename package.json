@@ -5,6 +5,7 @@
 	"icon": "media/icon.png",
 	"version": "0.0.2",
 	"repository": "https://github.com/malsyned/smart-dash-vscode",
+	"license": "GPL-2.0-or-later",
 	"engines": {
 		"vscode": "^1.68.0"
 	},
