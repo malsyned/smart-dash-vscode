@@ -42,7 +42,7 @@ async function insert(editor: TextEditor, doc: TextDocument, pos: Position) {
     let dashOrUnderscore = '-';
 
     if (smartDashIsAllowed(doc, pos)) {
-        await fixupCLike(editor, doc, pos);
+        await fixupCLikeAllSelections(editor, doc);
         if (charsBehind(doc, pos, 1).match(identRegEx)) {
             dashOrUnderscore = '_';
         }
@@ -53,20 +53,26 @@ async function insert(editor: TextEditor, doc: TextDocument, pos: Position) {
 
 async function insertGt(editor: TextEditor, doc: TextDocument, pos: Position) {
     if (smartDashIsAllowed(doc, pos)) {
-        await fixupCLike(editor, doc, pos);
+        await fixupCLikeAllSelections(editor, doc);
     }
     await type('>');
 }
 
-async function fixupCLike(editor: TextEditor, doc: TextDocument, pos: Position) {
+async function fixupCLikeAllSelections(editor: TextEditor, doc: TextDocument) {
     if (!languageIsCLike(doc)) {
         return;
     }
 
+    for (let selection of editor.selections) {
+        await fixupCLike(editor, doc, selection.start);
+    }
+}
+
+async function fixupCLike(editor: TextEditor, doc: TextDocument, pos: Position) {
     if (charsBehindEqual(doc, pos, '_')) {
-        await replaceLeft(editor, '-');
+        await replaceLeft(editor, pos, '-');
     } else if (charsBehindEqual(doc, pos, '--')) {
-        await replaceLeft(editor, '_-');
+        await replaceLeft(editor, pos, '_-');
     }
 }
 
@@ -74,8 +80,7 @@ async function type(text: string) {
     await commands.executeCommand('type', { text: text });
 }
 
-async function replaceLeft(editor: TextEditor, chars: string) {
-    const end = editor.selection.start;
+async function replaceLeft(editor: TextEditor, end: Position, chars: string) {
     const start = end.translate(undefined, -chars.length);
     const range = new Range(start, end);
 

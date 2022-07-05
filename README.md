@@ -78,6 +78,10 @@ JavaScript, and related languages. This list is customizable via the settings.
 
 ## Release Notes
 
+### 1.1.0
+
+Apply C fixups at all cursors
+
 ### 1.0.0
 
 Initial release of Smart-Dash
