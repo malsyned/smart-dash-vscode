@@ -34,7 +34,7 @@ function registerCommand(
         return callback(editor, doc, pos, ...args);
     }
     context.subscriptions.push(
-            commands.registerCommand(command, editorCallback));
+        commands.registerCommand(command, editorCallback));
 }
 
 async function insert(editor: TextEditor, doc: TextDocument, pos: Position) {
@@ -58,10 +58,8 @@ async function insertGt(editor: TextEditor, doc: TextDocument, pos: Position) {
     await type('>');
 }
 
-async function fixupCLike(editor: TextEditor, doc: TextDocument, pos: Position)
-{
-    if (!languageIsCLike(doc))
-    {
+async function fixupCLike(editor: TextEditor, doc: TextDocument, pos: Position) {
+    if (!languageIsCLike(doc)) {
         return;
     }
 
@@ -73,7 +71,7 @@ async function fixupCLike(editor: TextEditor, doc: TextDocument, pos: Position)
 }
 
 async function type(text: string) {
-    await commands.executeCommand('type', {text: text});
+    await commands.executeCommand('type', { text: text });
 }
 
 async function replaceLeft(editor: TextEditor, chars: string) {
@@ -83,7 +81,7 @@ async function replaceLeft(editor: TextEditor, chars: string) {
 
     await editor.edit(
         editBuilder => editBuilder.replace(range, chars),
-        {undoStopBefore: false, undoStopAfter: false});
+        { undoStopBefore: false, undoStopAfter: false });
 }
 
 function smartDashIsAllowed(doc: TextDocument, pos: Position): boolean {
@@ -114,8 +112,7 @@ function inVerbatimText(doc: TextDocument, pos: Position) {
     return verbatim;
 }
 
-function syntacticScopes(doc: TextDocument, pos: Position): string[]
-{
+function syntacticScopes(doc: TextDocument, pos: Position): string[] {
     let hscopes = extensions.getExtension('draivin.hscopes')?.exports;
     return hscopes?.getScopeAt(doc, pos)?.scopes || [];
 }
@@ -127,8 +124,7 @@ function charsBehindEqual(doc: TextDocument,
     return charsBehind(doc, pos, chars.length) === chars;
 }
 
-function charsBehind(doc: TextDocument, pos: Position, chars: number): string
-{
+function charsBehind(doc: TextDocument, pos: Position, chars: number): string {
     let stringStart = doc.positionAt(doc.offsetAt(pos) - chars);
     let range = new Range(stringStart, pos);
     return doc.getText(range);
