@@ -3,7 +3,7 @@
 	"displayName": "Smart-Dash",
 	"description": "Smartly replace dashes with underscores in identifiers",
 	"icon": "media/icon.png",
-	"version": "1.0.2",
+	"version": "1.1.0",
 	"publisher": "malsyned",
 	"repository": "https://github.com/malsyned/smart-dash-vscode",
 	"license": "GPL-2.0-or-later",
